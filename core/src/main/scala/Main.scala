@@ -11,8 +11,7 @@ def doStuff[E <: AnyRef: Enumerated](e: E): Unit =
   assert(valueOf(e.name) `eq` e)
   println(s"""{"${e.name}": ${e.ordinal}}""")
 
+
 object Test {
-
   def msg = "I was compiled by dotty :)"
-
 }
