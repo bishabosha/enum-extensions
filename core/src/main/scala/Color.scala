@@ -1,5 +1,5 @@
 import enumextensions._
 
-enum Color derives Enumerated {
+enum Color derives EnumMirror {
   case Red, Green, Blue
 }

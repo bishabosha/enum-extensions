@@ -1,41 +1,68 @@
 package enumextensions
-import quoted._
 
-trait NumericOps[T] extends Numeric[T] with Integral[T] {
+import EnumMirror._
 
-  extension (t: T) def repr: Int
+import scala.collection.immutable.NumericRange
+import scala.util.Try
+import scala.quoted._
 
-  final def compare(l: T, r: T): Int = l.repr - r.repr
+trait NumericOps[T](using final val mirror: EnumMirror[T]) extends Numeric[T] with Integral[T] { self =>
 
-  def size: Int
+  final def fromInt(x: Int): T = values(x)
+  final def parseString(str: String): Option[T] = Try(valueOf(str)).toOption
 
-  final def minus(x: T, y: T): T = fromInt((size + 1 + x.repr - y.repr) % size)
-  final def plus(x: T, y: T): T = fromInt((x.repr + y.repr) % size)
-  final def times(x: T, y: T): T = fromInt((x.repr * y.repr) % size)
-  final def quot(x: T, y: T): T = fromInt((x.repr / y.repr) % size)
-  final def rem(x: T, y: T): T = fromInt((x.repr % y.repr) % size)
-  final def negate(x: T): T = fromInt((size - x.repr) % size)
-  final def toDouble(x: T): Double = x.repr.toDouble
-  final def toFloat(x: T): Float = x.repr.toFloat
-  final def toInt(x: T): Int = x.repr
-  final def toLong(x: T): Long = x.repr.toLong
+  extension (t: T) {
+    def to (u: T): NumericRange[T]    = NumericRange.inclusive(t, u, one)(self)
+    def until (u: T): NumericRange[T] = NumericRange(t, u, one)(self)
+  }
 
 }
 
 object NumericOps {
-  import scala.collection.immutable.NumericRange
 
-  given RangeOps as AnyRef {
-    extension [T: NumericOps](t: T) {
-      def to (u: T): NumericRange[T] = NumericRange.inclusive(t, u, summon[NumericOps[T]].one)
-      def until (u: T): NumericRange[T] = NumericRange(t, u, summon[NumericOps[T]].one)
-    }
+  trait Singleton[T] extends NumericOps[T] {
+
+    final def compare(l: T, r: T): Int = 0
+
+    override final def one = zero
+
+    final def minus(x: T, y: T): T = x
+    final def plus(x: T, y: T): T = x
+    final def times(x: T, y: T): T = x
+    final def quot(x: T, y: T): T = x
+    final def rem(x: T, y: T): T = x
+    final def negate(x: T): T = x
+
+    final def toDouble(x: T): Double = 0
+    final def toFloat(x: T): Float = 0
+    final def toInt(x: T): Int = 0
+    final def toLong(x: T): Long = 0
+
   }
 
-  transparent inline def derived[T](using inline enumerated: Enumerated[T]): NumericOps[T] =
-    ${ derivedNumericOps[T]('enumerated) }
+  trait Modular[T] extends NumericOps[T] {
+    import mirror.size
 
-  def derivedNumericOps[T: Type](enumerated: Expr[Enumerated[T]])(using QuoteContext): Expr[NumericOps[T]] =
+    final def compare(l: T, r: T): Int = l.ordinal - r.ordinal
+
+    final def minus(x: T, y: T): T = fromInt((size + 1 + x.ordinal - y.ordinal) % size)
+    final def plus(x: T, y: T): T = fromInt((x.ordinal + y.ordinal) % size)
+    final def times(x: T, y: T): T = fromInt((x.ordinal * y.ordinal) % size)
+    final def quot(x: T, y: T): T = fromInt((x.ordinal / y.ordinal) % size)
+    final def rem(x: T, y: T): T = fromInt((x.ordinal % y.ordinal) % size)
+    final def negate(x: T): T = fromInt((size - x.ordinal) % size)
+
+    final def toDouble(x: T): Double = x.ordinal.toDouble
+    final def toFloat(x: T): Float = x.ordinal.toFloat
+    final def toInt(x: T): Int = x.ordinal
+    final def toLong(x: T): Long = x.ordinal.toLong
+
+  }
+
+  transparent inline def derived[T](using inline mirror: EnumMirror[T]): NumericOps[T] =
+    ${ derivedNumericOps[T]('mirror) }
+
+  def derivedNumericOps[T: Type](mirror: Expr[EnumMirror[T]])(using QuoteContext): Expr[NumericOps[T]] =
     import qctx.tasty._
 
     val tpe = typeOf[T]
@@ -44,21 +71,8 @@ object NumericOps {
       case Some(sym) => sym
       case _         => report.throwError(s"${tpe.show} is not a class type")
 
-    if sym.children.length < 2 then // Numeric APIs expect `T` to *not* be singleton
-      report.throwError(s"enum ${tpe.show} needs at least 2 cases to derive ${quoted.Type[NumericOps[T]].show}")
-
-    '{
-      new {
-        import Enumerated._
-
-        given Enumerated[T] = $enumerated
-
-        extension (t: T) def repr: Int = t.ordinal
-
-        final val size = summon[Enumerated[T]].size
-
-        def fromInt(x: Int): T = values(x)
-        def parseString(str: String): Option[T] = scala.util.Try(valueOf(str)).toOption
-      }
-    }
+    if sym.children.length > 1 then
+      '{ new NumericOps(using $mirror) with NumericOps.Modular[T]   }
+    else
+      '{ new NumericOps(using $mirror) with NumericOps.Singleton[T] }
 }

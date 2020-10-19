@@ -1,14 +1,13 @@
 import enumextensions._
-import NumericOps.{given _}
 
 import Rank._
 import Suit._
 
-enum Rank derives Enumerated, NumericOps {
+enum Rank derives EnumMirror, NumericOps {
   case Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace
 }
 
-enum Suit derives Enumerated, NumericOps {
+enum Suit derives EnumMirror, NumericOps {
   case Clubs, Diamonds, Hearts, Spades
 }
 

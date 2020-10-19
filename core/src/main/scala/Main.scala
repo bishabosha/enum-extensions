@@ -1,5 +1,5 @@
 import enumextensions._
-import Enumerated._
+import EnumMirror._
 
 @main def Main: Unit = {
   println(Color.Red)
@@ -7,7 +7,7 @@ import Enumerated._
   println(Test.msg)
 }
 
-def doStuff[E <: AnyRef: Enumerated](e: E): Unit =
+def doStuff[E <: AnyRef: EnumMirror](e: E): Unit =
   assert(valueOf(e.name) `eq` e)
   println(s"""{"${e.name}": ${e.ordinal}}""")
 
