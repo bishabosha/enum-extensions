@@ -8,7 +8,6 @@ import scala.quoted._
 
 trait NumericOps[T](using final val mirror: EnumMirror[T]) extends Numeric[T] with Integral[T] { self =>
 
-  final def fromInt(x: Int): T = values(x)
   final def parseString(str: String): Option[T] = Try(valueOf(str)).toOption
 
   extension (t: T) {
@@ -25,6 +24,8 @@ object NumericOps {
     final def compare(l: T, r: T): Int = 0
 
     override final def one = zero
+
+    final def fromInt(x: Int): T = zero
 
     final def minus(x: T, y: T): T = x
     final def plus(x: T, y: T): T = x
@@ -45,12 +46,14 @@ object NumericOps {
 
     final def compare(l: T, r: T): Int = l.ordinal - r.ordinal
 
-    final def minus(x: T, y: T): T = fromInt((size + 1 + x.ordinal - y.ordinal) % size)
-    final def plus(x: T, y: T): T = fromInt((x.ordinal + y.ordinal) % size)
-    final def times(x: T, y: T): T = fromInt((x.ordinal * y.ordinal) % size)
-    final def quot(x: T, y: T): T = fromInt((x.ordinal / y.ordinal) % size)
-    final def rem(x: T, y: T): T = fromInt((x.ordinal % y.ordinal) % size)
-    final def negate(x: T): T = fromInt((size - x.ordinal) % size)
+    final def minus(x: T, y: T): T = fromOrdinal((size + 1 + x.ordinal - y.ordinal) % size)
+    final def plus(x: T, y: T): T = fromOrdinal((x.ordinal + y.ordinal) % size)
+    final def times(x: T, y: T): T = fromOrdinal((x.ordinal * y.ordinal) % size)
+    final def quot(x: T, y: T): T = fromOrdinal((x.ordinal / y.ordinal) % size)
+    final def rem(x: T, y: T): T = fromOrdinal((x.ordinal % y.ordinal) % size)
+    final def negate(x: T): T = fromOrdinal((size - x.ordinal) % size)
+
+    final def fromInt(x: Int): T = fromOrdinal((x + size) % size)
 
     final def toDouble(x: T): Double = x.ordinal.toDouble
     final def toFloat(x: T): Float = x.ordinal.toFloat
@@ -71,8 +74,15 @@ object NumericOps {
       case Some(sym) => sym
       case _         => report.throwError(s"${tpe.show} is not a class type")
 
-    if sym.children.length > 1 then
-      '{ new NumericOps(using $mirror) with NumericOps.Modular[T]   }
-    else
-      '{ new NumericOps(using $mirror) with NumericOps.Singleton[T] }
+    if sym.children.length > 1 then '{
+      new NumericOps(using $mirror) with NumericOps.Modular[T] {
+        override final val zero = fromOrdinal(0)
+      }
+    }
+    else '{
+      new NumericOps(using $mirror) with NumericOps.Singleton[T] {
+        override final val zero = fromOrdinal(0)
+        override final val one  = fromOrdinal(1)
+      }
+    }
 }
