@@ -24,21 +24,27 @@ object EnumMirror {
   transparent inline def derived[E]: EnumMirror[E] = ${ derivedEnumMirror[E] }
 
   def derivedEnumMirror[E: Type](using QuoteContext): Expr[EnumMirror[E]] =
-    import qctx.tasty._
+    import qctx.reflect._
 
-    val tpe = typeOf[E]
+    val tpe = TypeRepr.of[E]
 
     val sym = tpe.classSymbol match
       case Some(sym) => sym
       case _         => report.throwError(s"${tpe.show} is not an enum type")
 
-    if !sym.flags.is(Flags.Enum)
+    if !sym.flags.is(Flags.Enum) then
       report.throwError(s"${tpe.show} is not an enum type")
 
     val E = sym.companionModule
 
-    val valuesRef                     = Select.unique(Ref(E), "values").seal.cast[Array[E]]
-    def reifyName(name: Expr[String]) = Select.overloaded(Ref(E), "valueOf", Nil, name.unseal::Nil).seal.cast[E]
+    val valuesRef =
+      Select.unique(Ref(E), "values").seal.cast[Array[E]]
+
+    def reifyName(name: Expr[String]) =
+      Select.overloaded(Ref(E), "valueOf", Nil, name.unseal::Nil).seal.cast[E]
+
+    def reifyOrdinal(ordinal: Expr[Int]) =
+      Select.overloaded(Ref(E), "fromOrdinal", Nil, ordinal.unseal::Nil).seal.cast[E]
 
     val sizeExpr = Expr(sym.children.length)
 
@@ -46,20 +52,15 @@ object EnumMirror {
 
       new EnumMirror[E] {
 
-        final val size: Int         = $sizeExpr
-        final val values: IArray[E] = IArray.unsafeFromArray($valuesRef)
-
+        final def size: Int = $sizeExpr
+        final def values: IArray[E] = IArray.unsafeFromArray($valuesRef)
         final def valueOf(name: String): E = ${ reifyName('name) }
+        final def fromOrdinal(ordinal: Int): E = ${ reifyOrdinal('ordinal) }
 
-        final def fromOrdinal(ordinal: Int): E =
-          try
-            values.asInstanceOf[Array[AnyRef]](ordinal).asInstanceOf[E]
-          catch
-            case ex: java.lang.ArrayIndexOutOfBoundsException => throw new IllegalArgumentException("" + ordinal)
-
-        extension (e: E & scala.Enum)
+        extension (e: E & scala.Enum) {
           final def ordinal: Int = e.ordinal
           final def name: String = e.productPrefix
+        }
 
       }
 

@@ -44,7 +44,7 @@ object NumericOps {
   trait Modular[T] extends NumericOps[T] {
     import mirror.size
 
-    final def compare(l: T, r: T): Int = l.ordinal - r.ordinal
+    final def compare(l: T, r: T): Int = l.ordinal compare r.ordinal
 
     final def minus(x: T, y: T): T = fromOrdinal((size + 1 + x.ordinal - y.ordinal) % size)
     final def plus(x: T, y: T): T = fromOrdinal((x.ordinal + y.ordinal) % size)
@@ -66,9 +66,9 @@ object NumericOps {
     ${ derivedNumericOps[T]('mirror) }
 
   def derivedNumericOps[T: Type](mirror: Expr[EnumMirror[T]])(using QuoteContext): Expr[NumericOps[T]] =
-    import qctx.tasty._
+    import qctx.reflect._
 
-    val tpe = typeOf[T]
+    val tpe = TypeRepr.of[T]
 
     val sym = tpe.classSymbol match
       case Some(sym) => sym

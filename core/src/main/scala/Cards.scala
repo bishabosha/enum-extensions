@@ -18,3 +18,5 @@ def Deck =
     suit <- Clubs to Spades
     rank <- Two   to Ace
   yield Card(suit, rank)
+
+@main def printDeck = println(Deck)
