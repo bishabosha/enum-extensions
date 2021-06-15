@@ -5,6 +5,6 @@ import org.junit.Assert._
 
 class Test1 {
   @Test def t1(): Unit = {
-    assertEquals(2, 1+1)
+    assertEquals("""{"Red": 0, "parent": "example.Color"}""", reflectOn(Color.Red))
   }
 }

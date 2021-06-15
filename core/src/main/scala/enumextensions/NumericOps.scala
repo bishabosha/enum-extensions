@@ -63,26 +63,5 @@ object NumericOps {
   }
 
   transparent inline def derived[T](using inline mirror: EnumMirror[T]): NumericOps[T] =
-    ${ derivedNumericOps[T]('mirror) }
-
-  def derivedNumericOps[T: Type](mirror: Expr[EnumMirror[T]])(using QuoteContext): Expr[NumericOps[T]] =
-    import qctx.reflect._
-
-    val tpe = TypeRepr.of[T]
-
-    val sym = tpe.classSymbol match
-      case Some(sym) => sym
-      case _         => report.throwError(s"${tpe.show} is not a class type")
-
-    if sym.children.length > 1 then '{
-      new NumericOps(using $mirror) with NumericOps.Modular[T] {
-        override final val zero = fromOrdinal(0)
-      }
-    }
-    else '{
-      new NumericOps(using $mirror) with NumericOps.Singleton[T] {
-        override final val zero = fromOrdinal(0)
-        override final val one  = fromOrdinal(1)
-      }
-    }
+    ${ Macros.derivedNumericOps[T]('mirror) }
 }

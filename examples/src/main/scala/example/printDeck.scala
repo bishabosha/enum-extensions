@@ -1,3 +1,5 @@
+package example
+
 import enumextensions._
 
 import Rank._
@@ -19,4 +21,4 @@ def Deck =
     rank <- Two   to Ace
   yield Card(suit, rank)
 
-@main def printDeck = println(Deck)
+@main def printDeck = Deck.foreach(println)
