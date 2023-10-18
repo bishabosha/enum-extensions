@@ -1,11 +1,11 @@
 package enumextensions
 
-import scala.quoted._
+import scala.quoted.*
 
 object Macros:
 
   def derivedEnumMirror[E: Type](using Quotes): Expr[EnumMirror[E]] =
-    import quotes.reflect._
+    import quotes.reflect.*
 
     val tpe = TypeRepr.of[E]
 
@@ -13,7 +13,7 @@ object Macros:
       case Some(sym) if sym.flags.is(Flags.Enum) && !sym.flags.is(Flags.JavaDefined) =>
         sym
       case _ =>
-        report.throwError(s"${tpe.show} is not an enum type")
+        report.errorAndAbort(s"${tpe.show} is not an enum type")
 
     val E = sym.companionModule
 
@@ -34,9 +34,11 @@ object Macros:
 
       new EnumMirror[E]:
 
+        private val _values: IArray[E] = IArray.unsafeFromArray($valuesRef)
+
         final def mirroredName: String = $mirroredNameExpr
         final def size: Int = $sizeExpr
-        final def values: IArray[E] = IArray.unsafeFromArray($valuesRef)
+        final def values: IArray[E] = _values
         final def valueOf(name: String): E = ${ reifyName('name) }
         final def fromOrdinal(ordinal: Int): E = ${ reifyOrdinal('ordinal) }
 
@@ -49,26 +51,5 @@ object Macros:
     }
 
   end derivedEnumMirror
-
-  def derivedNumericOps[T: Type](mirror: Expr[EnumMirror[T]])(using Quotes): Expr[NumericOps[T]] =
-    import quotes.reflect._
-    import EnumMirror._
-
-    val tpe = TypeRepr.of[T]
-
-    val sym = tpe.classSymbol match
-      case Some(sym) => sym
-      case _         => report.throwError(s"${tpe.show} is not a class type")
-
-    if sym.children.length > 1 then ('{
-      new NumericOps(using $mirror) with NumericOps.Modular[T]:
-        override final val zero = fromOrdinal(0)
-    })
-    else ('{
-      new NumericOps(using $mirror) with NumericOps.Singleton[T]:
-        override final val zero = fromOrdinal(0)
-        override final val one  = fromOrdinal(1)
-    })
-  end derivedNumericOps
 
 end Macros

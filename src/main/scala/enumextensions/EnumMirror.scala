@@ -14,10 +14,7 @@ trait EnumMirror[E]:
 
 object EnumMirror:
 
-  inline def values[E](using E: EnumMirror[E]): IArray[E] = E.values
-  inline def valueOf[E](name: String)(using E: EnumMirror[E]): E = E.valueOf(name)
-  inline def fromOrdinal[E](ordinal: Int)(using E: EnumMirror[E]): E = E.fromOrdinal(ordinal)
-  inline def enumMirror[E](using E: EnumMirror[E]): E.type = E
+  inline def apply[E](using mirror: EnumMirror[E]): mirror.type = mirror
 
   transparent inline def derived[E]: EnumMirror[E] = ${ Macros.derivedEnumMirror[E] }
 
