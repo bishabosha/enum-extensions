@@ -15,15 +15,18 @@ object Macros:
       case Some(sym) => sym
       case _         => report.errorAndAbort(s"${tpe.show} is not a class type")
 
-    if sym.children.length > 1 then ('{
-      new NumericOps(using $mirror) with NumericOps.Modular[T]:
-        override final val zero = EnumMirror[T].fromOrdinal(0)
-        override final val one  = EnumMirror[T].fromOrdinal(1)
-    })
-    else ('{
-      new NumericOps(using $mirror) with NumericOps.Singleton[T]:
-        override final val zero = EnumMirror[T].fromOrdinal(0)
-    })
+    if sym.children.length > 1 then
+      '{
+        new NumericOps(using $mirror) with NumericOps.Modular[T]:
+          override final val zero = EnumMirror[T].fromOrdinalUnsafe(0)
+          override final val one  = EnumMirror[T].fromOrdinalUnsafe(1)
+      }
+    else
+      '{
+        new NumericOps(using $mirror) with NumericOps.Singleton[T]:
+          override final val zero = EnumMirror[T].fromOrdinalUnsafe(0)
+      }
+    end if
   end derivedNumericOps
 
 end Macros
