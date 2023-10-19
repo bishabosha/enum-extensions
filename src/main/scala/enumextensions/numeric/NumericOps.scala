@@ -8,7 +8,7 @@ import scala.quoted.*
 
 trait NumericOps[T](using final val mirror: EnumMirror[T]) extends Numeric[T] with Integral[T] { self =>
 
-  final def parseString(str: String): Option[T] = Try(EnumMirror[T].valueOf(str)).toOption
+  final def parseString(str: String): Option[T] = EnumMirror[T].valueOf(str)
 
   extension (t: T) {
     def to (u: T): NumericRange[T]    = NumericRange.inclusive(t, u, one)(self)
@@ -46,14 +46,14 @@ object NumericOps {
 
     final def compare(l: T, r: T): Int = l.ordinal compare r.ordinal
 
-    final def minus(x: T, y: T): T = EnumMirror[T].fromOrdinal((size + 1 + x.ordinal - y.ordinal) % size)
-    final def plus(x: T, y: T): T = EnumMirror[T].fromOrdinal((x.ordinal + y.ordinal) % size)
-    final def times(x: T, y: T): T = EnumMirror[T].fromOrdinal((x.ordinal * y.ordinal) % size)
-    final def quot(x: T, y: T): T = EnumMirror[T].fromOrdinal((x.ordinal / y.ordinal) % size)
-    final def rem(x: T, y: T): T = EnumMirror[T].fromOrdinal((x.ordinal % y.ordinal) % size)
-    final def negate(x: T): T = EnumMirror[T].fromOrdinal((size - x.ordinal) % size)
+    final def minus(x: T, y: T): T = EnumMirror[T].fromOrdinalUnsafe((size + 1 + x.ordinal - y.ordinal) % size)
+    final def plus(x: T, y: T): T = EnumMirror[T].fromOrdinalUnsafe((x.ordinal + y.ordinal) % size)
+    final def times(x: T, y: T): T = EnumMirror[T].fromOrdinalUnsafe((x.ordinal * y.ordinal) % size)
+    final def quot(x: T, y: T): T = EnumMirror[T].fromOrdinalUnsafe((x.ordinal / y.ordinal) % size)
+    final def rem(x: T, y: T): T = EnumMirror[T].fromOrdinalUnsafe((x.ordinal % y.ordinal) % size)
+    final def negate(x: T): T = EnumMirror[T].fromOrdinalUnsafe((size - x.ordinal) % size)
 
-    final def fromInt(x: Int): T = EnumMirror[T].fromOrdinal((x + size) % size)
+    final def fromInt(x: Int): T = EnumMirror[T].fromOrdinalUnsafe((x + size) % size)
 
     final def toDouble(x: T): Double = x.ordinal.toDouble
     final def toFloat(x: T): Float = x.ordinal.toFloat

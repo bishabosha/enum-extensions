@@ -22,10 +22,16 @@ class ReflectionSuite extends munit.FunSuite {
       assertEquals(e.ordinal, expected)
 
     def testValueOf[E: EnumMirror](name: String, expected: E)(using munit.Location) =
-      assertEquals(EnumMirror[E].valueOf(name), expected)
+      assertEquals(EnumMirror[E].valueOfUnsafe(name), expected)
 
     def testFromOrdinal[E: EnumMirror](ordinal: Int, expected: E)(using munit.Location) =
-      assertEquals(EnumMirror[E].fromOrdinal(ordinal), expected)
+      assertEquals(EnumMirror[E].fromOrdinalUnsafe(ordinal), expected)
+
+    def testDeclaresName[E: EnumMirror](name: String)(using munit.Location) =
+      assertEquals(EnumMirror[E].declaresName(name), true)
+
+    def testDeclaresOrdinal[E: EnumMirror](ordinal: Int)(using munit.Location) =
+      assertEquals(EnumMirror[E].declaresOrdinal(ordinal), true)
 
     assertEquals(EnumMirror[Color].mirroredName, "example.ReflectionSuite$.Color")
     assertEquals(EnumMirror[Color].size, 3)
@@ -33,6 +39,12 @@ class ReflectionSuite extends munit.FunSuite {
     testValueOf("Red", Red)
     testValueOf("Green", Green)
     testValueOf("Blue", Blue)
+    testDeclaresName[Color]("Red")
+    testDeclaresName[Color]("Green")
+    testDeclaresName[Color]("Blue")
+    testDeclaresOrdinal[Color](0)
+    testDeclaresOrdinal[Color](1)
+    testDeclaresOrdinal[Color](2)
     testFromOrdinal(0, Red)
     testFromOrdinal(1, Green)
     testFromOrdinal(2, Blue)
