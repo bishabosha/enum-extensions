@@ -18,10 +18,14 @@ trait EnumMirror[E]:
     def ordinal: Int
     def name: String
 
+end EnumMirror
+
 object EnumMirror:
 
   inline def apply[E](using mirror: EnumMirror[E]): mirror.type = mirror
 
-  transparent inline def derived[E]: EnumMirror[E] = ${ Macros.derivedEnumMirror[E] }
+  transparent inline def derived[E]: EnumMirror[E] = ${
+    Macros.derivedEnumMirror[E]
+  }
 
 end EnumMirror

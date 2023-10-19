@@ -4,15 +4,13 @@ import enumextensions.EnumMirror
 
 import ReflectionSuite.*
 
-object ReflectionSuite {
-  enum Color derives EnumMirror {
+object ReflectionSuite:
+  enum Color derives EnumMirror:
     case Red, Green, Blue
-  }
-}
 
-class ReflectionSuite extends munit.FunSuite {
+class ReflectionSuite extends munit.FunSuite:
 
-  test("EnumMirror Color") {
+  test("EnumMirror Color"):
     import Color.{Red, Green, Blue}
 
     def testName[E: EnumMirror](e: E, expected: String)(using munit.Location) =
@@ -33,7 +31,10 @@ class ReflectionSuite extends munit.FunSuite {
     def testDeclaresOrdinal[E: EnumMirror](ordinal: Int)(using munit.Location) =
       assertEquals(EnumMirror[E].declaresOrdinal(ordinal), true)
 
-    assertEquals(EnumMirror[Color].mirroredName, "example.ReflectionSuite$.Color")
+    assertEquals(
+      EnumMirror[Color].mirroredName,
+      "example.ReflectionSuite$.Color"
+    )
     assertEquals(EnumMirror[Color].size, 3)
     assertEquals(EnumMirror[Color].values.toSeq, Seq(Red, Green, Blue))
     testValueOf("Red", Red)
@@ -54,6 +55,5 @@ class ReflectionSuite extends munit.FunSuite {
     testOrdinal(Red, 0)
     testOrdinal(Green, 1)
     testOrdinal(Blue, 2)
-  }
-
-}
+  .endLocally
+end ReflectionSuite
