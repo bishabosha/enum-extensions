@@ -18,5 +18,9 @@ jobs:
     - uses: VirtusLab/scala-cli-setup@v1.0
       with:
         power: true
-    - name: Test
+
+    - name: Check formatting
+      run: scala-cli fmt . --check
+
+    - name: Run unit tests
       run: scala-cli test . --cross
