@@ -15,7 +15,7 @@ Type classes are provided in the `enumextensions` package.
 
 See the above use cases in action below:
 
-```scala
+```scala sc:nocompile
 import enumextensions.EnumMirror
 
 def enumName[E: EnumMirror]: String =
@@ -44,7 +44,7 @@ def unsafeLookup[E: EnumMirror](ordinal: Int): E =
 
 `given` instances of `EnumMirror` are not provided automatically, you must explicitly opt in as follows:
 
-```scala
+```scala sc:nocompile
 enum Color derives EnumMirror:
   case Red, Green, Blue
 ```
@@ -55,7 +55,7 @@ In the `enumextensions.numeric` package we provide `NumericOps`, which extends t
 
 Let's define a `WeekDays` enumeration, opting into numeric derivation by `derives NumericOps`, and declare ranges for both the `daysOfWeek` and `weekend`:
 
-```scala
+```scala sc:nocompile
 import enumextensions.EnumMirror
 import enumextensions.numeric.NumericOps
 
@@ -69,7 +69,7 @@ object WeekDays:
 ```
 
 here is a demonstration of using the numeric operators, e.g.
-```scala
+```scala sc:nocompile
 scala> -(-Wednesday) == Wednesday
 true
 ```

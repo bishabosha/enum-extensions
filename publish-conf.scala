@@ -1,0 +1,8 @@
+//> using publish.organization "io.github.bishabosha"
+//> using publish.name "enum-extensions"
+//> using publish.computeVersion "git:tag"
+//> using publish.repository "central-s01"
+//> using publish.license "Apache-2.0"
+//> using publish.url "https://github.com/bishabosha/enum-extensions"
+//> using publish.versionControl "github:bishabosha/enum-extensions"
+//> using publish.developer "bishabosha|Jamie Thompson|https://github.com/bishabosha"
