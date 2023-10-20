@@ -1,5 +1,5 @@
-//> using scala "3.3.1"
-//> using jvm "17"
-//> using toolkit "0.2.0"
-//> using option "-Xcheck-macros"
-
+//> using scala 3.3.1
+//> using jvm 8
+//> using test.dep org.scalameta::munit:1.0.0-M10
+//> using option -Xcheck-macros
+//> using options -siteroot ${.}
