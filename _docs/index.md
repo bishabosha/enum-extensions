@@ -15,7 +15,7 @@ Type classes are provided in the `enumextensions` package.
 
 See the above use cases in action below:
 
-```scala sc:nocompile
+```scala
 import enumextensions.EnumMirror
 
 def enumName[E: EnumMirror]: String =
@@ -33,13 +33,13 @@ def nameOrdinalPairs[E: EnumMirror]: Map[String, Int] =
 def safeLookup[E: EnumMirror](name: String): Option[E] =
   EnumMirror[E].valueOf(name)
 def safeLookup[E: EnumMirror](ordinal: Int): Option[E] =
-  EnumMirror[E].fromOrdinal(name)
+  EnumMirror[E].fromOrdinal(ordinal)
 
 // assert that name/ordinal exists for convenience
 def unsafeLookup[E: EnumMirror](name: String): E =
-  EnumMirror[E].unsafeValueOf(name)
+  EnumMirror[E].valueOfUnsafe(name)
 def unsafeLookup[E: EnumMirror](ordinal: Int): E =
-  EnumMirror[E].unsafeFromOrdinal(name)
+  EnumMirror[E].fromOrdinalUnsafe(ordinal)
 ```
 
 `given` instances of `EnumMirror` are not provided automatically, you must explicitly opt in as follows:
