@@ -1,4 +1,6 @@
 # Enum Extensions
+![CI status](https://github.com/bishabosha/enum-extensions/actions/workflows/ci.yml/badge.svg)
+
 The Enum Extensions library provides type classes to work generically with enumerations in Scala 3
 
 ## Usage
